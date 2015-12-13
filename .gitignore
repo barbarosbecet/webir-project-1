@@ -59,4 +59,4 @@ target/
 # PyCharm
 .idea/
 
-*.csv
+links.csv
