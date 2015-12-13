@@ -1,8 +1,8 @@
-""" WiSe 15, WebIR, Project 1, Becet, Simmet"""
+""" WiSe 15, WebIR, Project Starter, Becet, Simmet"""
 
 
 def main():
-    # TODO: Write an example running experiment!
+    # TODO: Example run!
     pass
 
 
