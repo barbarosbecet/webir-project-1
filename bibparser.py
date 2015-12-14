@@ -22,14 +22,14 @@ def _customizations(record):
     return record
 
 
-def get_all_bibs(location):
+def get_all_bibs(locations):
     """
     Retrieve all the .bib files and parse their content to a list of simple dictionaries
     :param location: directory with .bib files
     :return: return a list of dictionaries
     """
     result = []
-    for file_location in glob.glob("".join(location+"*.bib")):
+    for file_location in locations:
         with open(file_location, encoding="utf-8") as bib_file:
             result.extend(bibtexparser.load(bib_file).entries)
     return result

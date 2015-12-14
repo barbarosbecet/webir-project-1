@@ -18,7 +18,7 @@ def example_run():
     """
     An example (should be) working run...
     """
-    bib_items = bibparser.get_all_bibs(crawler.getFileLocations())
+    bib_items = bibparser.get_all_bibs(crawler.getFileLocations(max_level=2))
     my_db = database.BibDB()
     my_db.create_tables()
     my_db.fill_entries(bib_items)

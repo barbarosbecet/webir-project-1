@@ -29,8 +29,8 @@ def bib_download(urls):
             if response.status == 200 and urls[item].endswith(".bib"):
                 logger.info("Downloading file @ {}".format(urls[item]))
                 urlretrieve(urls[item], "./bibs/bib_%i.bib" %item)
-                logger.info("File saved @ {}".format(abspath("bib_%i.bib" %item)))
-                locations.append("{}".format(abspath("bib_%i.bib" %item)))
+                logger.info("File saved @ {}".format(abspath("./bibs/bib_%i.bib" %item)))
+                locations.append("{}".format(abspath("./bibs/bib_%i.bib" %item)))
             else:
                 logger.error("No bib file found at given URL, download aborted! @ {}".format(urls[item]))
     return locations
@@ -87,12 +87,12 @@ def crawl(urls, level=1):
     return links
 
 
-def getFileLocations():
+def getFileLocations(max_level):
     with open("seeds.txt") as f:
         urls = f.readlines()
 
-    all_bib_links = crawl(urls,2)
-    file_locations = bib_download(all_bib_links);
+    all_bib_links = crawl(urls, max_level)
+    file_locations = bib_download(all_bib_links)
 
     return file_locations
 
