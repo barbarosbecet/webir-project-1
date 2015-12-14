@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 def bib_download(urls):
+    """
+    Downloading of the specified Bib URLs
+    """
     locations = []
     for item in range(len(urls)):
         try:
@@ -37,6 +40,9 @@ def bib_download(urls):
 
 
 def get_links(url):
+    """
+    Getting all the links the the specified URL
+    """
     links = []
     try:
         response = urlopen(url)
@@ -55,9 +61,13 @@ def get_links(url):
 
     return links
 
+"""
 
+"""
 def crawl(urls, level=1):
-
+    """
+    Crawling for links and BibTex files on the specified URLs to the deepness of level
+    """
     links = []
     all_links = [[], []]
     for url in range(len(urls)):
@@ -75,7 +85,6 @@ def crawl(urls, level=1):
                 all_links_tmp = get_links(all_links[lvl-1][ins])
             all_links[lvl-1] = all_links_tmp
 
-    # hop !! problem is that sometimes only half links are stored or even just trash or nothing for that exception in opening
     for lvl in range(1, level):
         for ln in range(1, len(all_links[lvl])):
             with urlopen(all_links[lvl][ln]) as response:
@@ -88,6 +97,9 @@ def crawl(urls, level=1):
 
 
 def getFileLocations(max_level):
+    """
+    Starts the process with the specified level deepness and returns a list of the locations of the bib files.
+    """
     with open("seeds.txt") as f:
         urls = f.readlines()
 
@@ -102,7 +114,6 @@ def main():
         urls = f.readlines()
 
     # naked_url needed for some pages, have to be known
-    # all_links = crawl(start_url, naked_url)
     all_bib_links = crawl(urls,2)
     file_locations = bib_download(all_bib_links);
     # print(file_locations)
