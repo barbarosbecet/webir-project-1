@@ -15,7 +15,10 @@ logger = logging.getLogger(__name__)
 
 
 def example_run():
-    bib_items = bibparser.get_all_bibs("bibs/")
+    """
+    An example (should be) working run...
+    """
+    bib_items = bibparser.get_all_bibs(crawler.getFileLocations())
     my_db = database.BibDB()
     my_db.create_tables()
     my_db.fill_entries(bib_items)

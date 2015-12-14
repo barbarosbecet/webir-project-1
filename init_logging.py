@@ -18,7 +18,7 @@ def init_logging():
         },
         'handlers': {
             'default': {
-                'level': 'WARNING',
+                'level': 'INFO',
                 'formatter': 'standard',
                 'class': 'logging.StreamHandler',
             },
@@ -26,7 +26,7 @@ def init_logging():
         'loggers': {
             '': {
                 'handlers': ['default'],
-                'level': 'WARNING',
+                'level': 'INFO',
                 'formatter': 'standard',
                 'propagate': True
             }
