@@ -60,3 +60,5 @@ target/
 .idea/
 
 links.csv
+bib_db
+bibs/
