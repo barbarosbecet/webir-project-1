@@ -19,7 +19,11 @@ def example_run():
     An example (should be) working run...
     """
     bib_items = bibparser.get_all_bibs(crawler.getFileLocations(max_level=2))
-    my_db = database.BibDB()
+    my_db = database.BibDB(db_user_name="root",
+                           db_password="WebIR2015",
+                           db_address="localhost",
+                           db_name="bib_db",
+                           verbose=False)
     my_db.create_tables()
     my_db.fill_entries(bib_items)
 
