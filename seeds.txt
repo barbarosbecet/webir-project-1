@@ -1,3 +1,5 @@
 http://www.isg.uni-konstanz.de/publications/
 http://bib.dbvis.de/
 http://www.informatik.uni-konstanz.de/cvia/publications/
+
+http://www.ims.uni-stuttgart.de/institut/mitarbeiter/seeker/
