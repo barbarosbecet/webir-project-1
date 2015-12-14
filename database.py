@@ -125,7 +125,7 @@ class BibDB:
                 session = self.Session()
                 session.add_all(items)
                 session.commit()
-            except BaseException as e:
+            except Exception as e:
                 logger.error("Error at writing to database!")
         else:
             logger.error("Engine is NOT initialized!")

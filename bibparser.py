@@ -33,7 +33,7 @@ def get_all_bibs(locations):
         try:
             with open(file_location, encoding="utf-8") as bib_file:
                 result.extend(bibtexparser.load(bib_file).entries)
-        except BaseException as e:
+        except Exception as e:
             logger.error(" - ".join(".bib parsing error: ", file_location))
     return result
 
