@@ -104,26 +104,29 @@ class BibDB:
         Fill the database with parsed .bib entries
         """
         if self.Engine is not None:
-            items = []
-            for ent in bib_list:
-                new_entry = Entry(
-                    entry_type=ent.get("ENTRYTYPE", "").encode("utf-8"),
-                    entry_id=ent.get("ID", "").encode("utf-8"),
-                    title=ent.get("title", "").encode("utf-8"),
-                    publisher=ent.get("publisher", "").encode("utf-8"),
-                    editor=ent.get("editor", "").encode("utf-8"),
-                    year=int(ent.get("year", "").encode("utf-8")),
-                    journal=ent.get("journal", "").encode("utf-8"),
-                    isbn=ent.get("isbn", "").encode("utf-8"),
-                    volume=ent.get("volume", "").encode("utf-8"),
-                    doi=ent.get("doi", "").encode("utf-8"),
-                    link=ent.get("link", "").encode("utf-8"),
-                    note=ent.get("note", "").encode("utf-8")
-                )
-                items.append(new_entry)
-            session = self.Session()
-            session.add_all(items)
-            session.commit()
+            try:
+                items = []
+                for ent in bib_list:
+                    new_entry = Entry(
+                        entry_type=ent.get("ENTRYTYPE", "").encode("utf-8"),
+                        entry_id=ent.get("ID", "").encode("utf-8"),
+                        title=ent.get("title", "").encode("utf-8"),
+                        publisher=ent.get("publisher", "").encode("utf-8"),
+                        editor=ent.get("editor", "").encode("utf-8"),
+                        year=int(ent.get("year", "").encode("utf-8")),
+                        journal=ent.get("journal", "").encode("utf-8"),
+                        isbn=ent.get("isbn", "").encode("utf-8"),
+                        volume=ent.get("volume", "").encode("utf-8"),
+                        doi=ent.get("doi", "").encode("utf-8"),
+                        link=ent.get("link", "").encode("utf-8"),
+                        note=ent.get("note", "").encode("utf-8")
+                    )
+                    items.append(new_entry)
+                session = self.Session()
+                session.add_all(items)
+                session.commit()
+            except BaseException as e:
+                logger.error("Error at writing to database!")
         else:
             logger.error("Engine is NOT initialized!")
 
