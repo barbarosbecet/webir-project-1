@@ -7,8 +7,14 @@ from bs4 import BeautifulSoup
 from urllib.request import urlopen, urlretrieve
 from urllib.error import URLError
 from os.path import abspath
+from init_logging import init_logging
 import logging
 import re
+
+
+if __name__ == "__main__":
+    init_logging()
+logger = logging.getLogger(__name__)
 
 
 def bib_download(urls):
@@ -17,16 +23,16 @@ def bib_download(urls):
         try:
             response = urlopen(urls[item])
         except URLError as e:
-            logging.error("URL/HTTP error @ {} : {}".format(urls[item], e))
+            logger.error("URL/HTTP error @ {} : {}".format(urls[item], e))
             return None
         else:
             if response.status == 200 and urls[item].endswith(".bib"):
-                logging.info("Downloading file @ {}".format(urls[item]))
+                logger.info("Downloading file @ {}".format(urls[item]))
                 urlretrieve(urls[item], "./bibs/bib_%i.bib" %item)
-                logging.info("File saved @ {}".format(abspath("bib_%i.bib" %item)))
+                logger.info("File saved @ {}".format(abspath("bib_%i.bib" %item)))
                 locations.append("{}".format(abspath("bib_%i.bib" %item)))
             else:
-                logging.error("No bib file found at given URL, download aborted! @ {}".format(urls[item]))
+                logger.error("No bib file found at given URL, download aborted! @ {}".format(urls[item]))
     return locations
 
 
@@ -35,10 +41,10 @@ def get_links(url):
     try:
         response = urlopen(url)
     except ValueError as e:
-        logging.error("URL/HTTP error @ {} : {}".format(url, e))
+        logger.error("URL/HTTP error @ {} : {}".format(url, e))
         return None
     except URLError as e:
-            logging.error("URL/HTTP error @ {} : {}".format(url, e))
+            logger.error("URL/HTTP error @ {} : {}".format(url, e))
             return None
     else:
         if response.status == 200:
@@ -90,10 +96,8 @@ def getFileLocations():
 
     return file_locations
 
+
 def main():
-
-
-    logging.basicConfig(format="%(levelname)s - '%(message)s'", level=logging.INFO)
     with open("seeds.txt") as f:
         urls = f.readlines()
 
