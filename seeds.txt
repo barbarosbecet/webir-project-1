@@ -1,4 +1,7 @@
 http://www.isg.uni-konstanz.de/publications/
+<<<<<<< HEAD
 http://bib.dbvis.de/
 http://www.informatik.uni-konstanz.de/cvia/publications/
+=======
+>>>>>>> origin/master
 http://www.ims.uni-stuttgart.de/institut/mitarbeiter/seeker/
