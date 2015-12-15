@@ -26,16 +26,16 @@ class Entry(Base):
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     entry_type = Column(String(50))
     entry_id = Column(String(50))
-    title = Column(String(50))
-    publisher = Column(String(50))
-    editor = Column(String(50))
+    title = Column(String(200))
+    publisher = Column(String(100))
+    editor = Column(String(100))
     year = Column(Integer)
-    journal = Column(String(50))
+    journal = Column(String(100))
     isbn = Column(String(50))
     volume = Column(String(50))
-    doi = Column(String(50))
-    link = Column(String(50))
-    note = Column(String(50))
+    doi = Column(String(100))
+    link = Column(String(200))
+    note = Column(String(200))
 
     def __repr__(self):
         return """Entry(
