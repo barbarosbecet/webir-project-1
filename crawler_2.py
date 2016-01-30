@@ -17,6 +17,8 @@ from validateurl import url_is_http
 from validateurl import url_is_relative
 
 
+biblist = []
+
 if __name__ == "__main__":
     init_logging()
 logger = logging.getLogger(__name__)
@@ -100,18 +102,28 @@ def print_child_list(url, depth):
     depth -- The crawling depth being analyzed, needed for printing stuff
 
     """
-    url_list2 = []
+    bibtmp = []
     url_list = get_url_list(url)
+
     for l in url_list:
         if url_is_http(l):
-            url_list2.append(l)
+            if l.endswith(".bib") or l.endswith(".bib.gz"):
+                biblist.append(l)
+                bibtmp.append(l)
         elif True:
-            url_list2.append(urljoin(url, l))
+            if l.endswith(".bib") or l.endswith(".bib.gz"):
+                biblist.append(urljoin(url, l))
+                bibtmp.append(urljoin(url, l))
 
+    """
     for l in url_list2:
         print_depth_point(depth)
         print(" %s" % (l))
+    """
 
+    for l in bibtmp:
+        print_depth_point(depth)
+        print(" %s" % (l))
 
 
 def print_depth_point(depth):
@@ -136,9 +148,7 @@ def main():
     with open("seeds.txt") as f:
         urls = f.readlines()
 
-
     print_links_to_level(urls[0], 2);
-
 
     # naked_url needed for some pages, have to be known
     # all_bib_links = crawl(urls,2);
