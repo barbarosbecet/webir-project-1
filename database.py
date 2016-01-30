@@ -8,6 +8,8 @@ import logging
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
 
 if __name__ == "__main__":
@@ -17,9 +19,20 @@ logger = logging.getLogger(__name__)
 Base = declarative_base()
 
 
+class Author(Base):
+    """
+    Base class to map author entries
+    """
+     __tablename__ = 'authors'
+    id = Column(Integer, primary_key=True)
+    first_name = Column(String(50))
+    last_name = Column(String(50))
+    asis_name = Column(String(150))
+
+
 class Entry(Base):
     """
-    Base class to map .bib "entries"
+    Base class to map .bib entries
     """
     __tablename__ = "entries"
 
@@ -125,7 +138,7 @@ class BibDB:
                 session = self.Session()
                 session.add_all(items)
                 session.commit()
-            except Exception as e:
+            except:
                 logger.error("Error at writing to database!")
         else:
             logger.error("Engine is NOT initialized!")
