@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 DEPTH_LEVEL_CHARACTER = '*'
 
+
 def exit_error(error, error_code):
     """
     exit_error function prints an error and exit with code specified
@@ -39,7 +40,34 @@ def exit_error(error, error_code):
     print("")
     sys.exit(error_code)
 
-def print_links_to_level(url, max_depth):
+def bib_download(urls):
+    """
+    Downloading of the specified Bib URLs
+    """
+    locations = []
+    for item in range(len(urls)):
+        try:
+            response = urlopen(urls[item])
+        except URLError as e:
+            logger.error("URL/HTTP error @ {} : {}".format(urls[item], e))
+            return None
+        else:
+            if response.getcode() == 200 and urls[item].endswith(".bib"):
+                logger.info("Downloading file @ {}".format(urls[item]))
+                urlretrieve(urls[item], "./bibs/bib_%i.bib" %item)
+                logger.info("File saved @ {}".format(abspath("./bibs/bib_%i.bib" %item)))
+                locations.append("{}".format(abspath("./bibs/bib_%i.bib" %item)))
+            elif response.getcode() == 200 and urls[item].endswith(".bib.gz"):
+                logger.info("Downloading file @ {}".format(urls[item]))
+                urlretrieve(urls[item], "./bibs/bib_%i.bib.gz" %item)
+                logger.info("File saved @ {}".format(abspath("./bibs/bib_%i.bib.gz" %item)))
+                locations.append("{}".format(abspath("./bibs/bib_%i.bib.gz" %item)))
+            else:
+                logger.error("No bib file found at given URL, download aborted! @ {}".format(urls[item]))
+    return locations
+
+
+def print_links_to_level(url, max_depth = 2):
     """
     arsespyder main function. Receives a URL and the crawling depth
     and prints on screen the links of the url, the links of the links
@@ -59,6 +87,7 @@ def print_links_to_level(url, max_depth):
         # Print level 2 links and recursive among their links until reach
         # maximum depth
         recursive_analyze_links(url, 2, max_depth)
+
 
 def recursive_analyze_links(url, depth, max_depth):
     url_list2 = []
@@ -90,6 +119,7 @@ def recursive_analyze_links(url, depth, max_depth):
 
         for l in url_list2:
             recursive_analyze_links(l, depth+1, max_depth)
+
 
 def print_child_list(url, depth):
     """
@@ -142,19 +172,32 @@ def print_depth_point(depth):
         counter+=1
 
 
+def getFileLocations(max_level):
+    """
+    Starts the process with the specified level deepness and returns a list of the locations of the bib files.
+    """
+    with open("seeds.txt") as f:
+        urls = f.readlines()
+
+    print_links_to_level(urls[0], max_level)
+    file_locations = bib_download(biblist)
+
+    return file_locations
 
 
 def main():
+    """
     with open("seeds.txt") as f:
         urls = f.readlines()
 
     print_links_to_level(urls[0], 2);
 
-    # naked_url needed for some pages, have to be known
-    # all_bib_links = crawl(urls,2);
-    # file_locations = bib_download(all_bib_links);
-    # print(file_locations)
+    file_locations = bib_download(biblist);
+    print(file_locations)
+    """
 
+    file_locations = getFileLocations(2)
+    print(file_locations)
 
 if __name__ == "__main__":
     main()
