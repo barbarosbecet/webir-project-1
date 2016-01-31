@@ -40,6 +40,7 @@ def exit_error(error, error_code):
     print("")
     sys.exit(error_code)
 
+
 def bib_download(urls):
     """
     Downloading of the specified Bib URLs
@@ -54,20 +55,20 @@ def bib_download(urls):
         else:
             if response.getcode() == 200 and urls[item].endswith(".bib"):
                 logger.info("Downloading file @ {}".format(urls[item]))
-                urlretrieve(urls[item], "./bibs/bib_%i.bib" %item)
-                logger.info("File saved @ {}".format(abspath("./bibs/bib_%i.bib" %item)))
-                locations.append("{}".format(abspath("./bibs/bib_%i.bib" %item)))
+                urlretrieve(urls[item], "./bibs/bib_%i.bib" % item)
+                logger.info("File saved @ {}".format(abspath("./bibs/bib_%i.bib" % item)))
+                locations.append("{}".format(abspath("./bibs/bib_%i.bib" % item)))
             elif response.getcode() == 200 and urls[item].endswith(".bib.gz"):
                 logger.info("Downloading file @ {}".format(urls[item]))
-                urlretrieve(urls[item], "./bibs/bib_%i.bib.gz" %item)
-                logger.info("File saved @ {}".format(abspath("./bibs/bib_%i.bib.gz" %item)))
-                locations.append("{}".format(abspath("./bibs/bib_%i.bib.gz" %item)))
+                urlretrieve(urls[item], "./bibs/bib_%i.bib.gz" % item)
+                logger.info("File saved @ {}".format(abspath("./bibs/bib_%i.bib.gz" % item)))
+                locations.append("{}".format(abspath("./bibs/bib_%i.bib.gz" % item)))
             else:
                 logger.error("No bib file found at given URL, download aborted! @ {}".format(urls[item]))
     return locations
 
 
-def print_links_to_level(url, max_depth = 2):
+def print_links_to_level(url, max_depth=2):
     """
     arsespyder main function. Receives a URL and the crawling depth
     and prints on screen the links of the url, the links of the links
@@ -79,7 +80,7 @@ def print_links_to_level(url, max_depth = 2):
 
     """
     if not url_is_http(url):
-        exit_error ("ERROR: URL provided must have HTTP/HTTPS scheme", 1)
+        exit_error("ERROR: URL provided must have HTTP/HTTPS scheme", 1)
     else:
         # First print all the child links (links on the URL)
         print_child_list(url, 1)
@@ -111,7 +112,6 @@ def recursive_analyze_links(url, depth, max_depth):
         # elif url_is_relative(l):
         elif True:
             url_list2.append(urljoin(url, l))
-
 
     if depth <= max_depth:
         for l in url_list2:
@@ -153,7 +153,7 @@ def print_child_list(url, depth):
 
     for l in bibtmp:
         print_depth_point(depth)
-        print(" %s" % (l))
+        print(" %s" % l)
 
 
 def print_depth_point(depth):
@@ -169,10 +169,10 @@ def print_depth_point(depth):
     while counter < depth:
         sys.stdout.write(DEPTH_LEVEL_CHARACTER)
         sys.stdout.flush()
-        counter+=1
+        counter += 1
 
 
-def getFileLocations(max_level):
+def get_file_locations(max_level):
     """
     Starts the process with the specified level deepness and returns a list of the locations of the bib files.
     """
@@ -196,7 +196,7 @@ def main():
     print(file_locations)
     """
 
-    file_locations = getFileLocations(2)
+    file_locations = get_file_locations(2)
     print(file_locations)
 
 if __name__ == "__main__":

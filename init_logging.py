@@ -1,6 +1,6 @@
 """
 WiSe 15, WebIR, Project-1, Becet, Simmet
-Initializer for logging (compatible for bibtexparser library)
+Initializer for logging
 """
 
 import logging

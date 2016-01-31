@@ -22,6 +22,7 @@ def bib_download(urls):
     Downloading of the specified Bib URLs
     """
     locations = []
+
     for item in range(len(urls)):
         try:
             response = urlopen(urls[item])
@@ -31,9 +32,9 @@ def bib_download(urls):
         else:
             if response.status == 200 and urls[item].endswith(".bib"):
                 logger.info("Downloading file @ {}".format(urls[item]))
-                urlretrieve(urls[item], "./bibs/bib_%i.bib" %item)
-                logger.info("File saved @ {}".format(abspath("./bibs/bib_%i.bib" %item)))
-                locations.append("{}".format(abspath("./bibs/bib_%i.bib" %item)))
+                urlretrieve(urls[item], "./bibs/bib_%i.bib" % item)
+                logger.info("File saved @ {}".format(abspath("./bibs/bib_%i.bib" % item)))
+                locations.append("{}".format(abspath("./bibs/bib_%i.bib" % item)))
             else:
                 logger.error("No bib file found at given URL, download aborted! @ {}".format(urls[item]))
     return locations
@@ -61,9 +62,7 @@ def get_links(url):
 
     return links
 
-"""
 
-"""
 def crawl(urls, level=1):
     """
     Crawling for links and BibTex files on the specified URLs to the deepness of level
@@ -96,7 +95,7 @@ def crawl(urls, level=1):
     return links
 
 
-def getFileLocations(max_level):
+def get_file_locations(max_level):
     """
     Starts the process with the specified level deepness and returns a list of the locations of the bib files.
     """
@@ -114,9 +113,9 @@ def main():
         urls = f.readlines()
 
     # naked_url needed for some pages, have to be known
-    all_bib_links = crawl(urls,2)
-    file_locations = bib_download(all_bib_links);
-    # print(file_locations)
+    all_bib_links = crawl(urls, 2)
+    file_locations = bib_download(all_bib_links)
+    print(file_locations)
 
 
 if __name__ == "__main__":

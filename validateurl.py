@@ -16,6 +16,7 @@
 #
 from urllib.parse import urlparse
 
+
 def url_is_http(url):
     """ 
     This functions checks if url has HTTP/HTTPS scheme 

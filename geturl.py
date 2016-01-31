@@ -19,6 +19,7 @@ from urllib.request import build_opener
 from urllib.error import URLError, HTTPError
 from bs4 import BeautifulSoup as Soup
 
+
 def url_to_string(url):
     """ 
     This functions returns the text of the page specified by url parameter
@@ -34,6 +35,7 @@ def url_to_string(url):
     except (URLError, HTTPError, ValueError):
         return ""
     return string
+
 
 def get_url_list(html_text):
     """ 

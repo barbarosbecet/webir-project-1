@@ -19,14 +19,8 @@ def _customizations(record):
     """
     Bibtexparser customizations that are applied to every entry found in the .bib files
     """
-    record = type(record)
-    record = author(record)
-    record = editor(record)
-    record = journal(record)
-    record = keyword(record)
-    record = link(record)
-    record = page_double_hyphen(record)
-    record = doi(record)
+    record = homogeneize_latex_encoding(record)
+
     return record
 
 

@@ -23,11 +23,22 @@ class Author(Base):
     """
     Base class to map author entries
     """
-     __tablename__ = 'authors'
-    id = Column(Integer, primary_key=True)
+    __tablename__ = 'authors'
+
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     first_name = Column(String(50))
     last_name = Column(String(50))
     asis_name = Column(String(150))
+
+    def __repr__(self):
+        return """Author(
+            first_name='{}',
+            last_name='{}',
+            asis_name='{}'""".format(
+            self.first_name,
+            self.last_name,
+            self.asis_name
+        )
 
 
 class Entry(Base):
@@ -52,8 +63,8 @@ class Entry(Base):
 
     def __repr__(self):
         return """Entry(
-            entry_type='{}',
-            entry_id='{}',
+            type='{}',
+            id='{}',
             title='{}',
             publisher='{}',
             editor='{}',
@@ -155,4 +166,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
