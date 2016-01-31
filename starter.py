@@ -15,9 +15,6 @@ logger = logging.getLogger(__name__)
 
 
 def example_run():
-    """
-    An example (should be) working run...
-    """
     bib_files = crawler.get_file_locations(max_level=2)
     bib_items = bibparser.get_all_entries(bib_files)
     my_db = database.BibDB(db_user_name="root",

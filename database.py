@@ -6,11 +6,10 @@ Database Module
 from init_logging import init_logging
 import logging
 import sqlalchemy
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.schema import Table
 
 if __name__ == "__main__":
     init_logging()
@@ -18,20 +17,67 @@ logger = logging.getLogger(__name__)
 
 Base = declarative_base()
 
+author_entry_association_table = Table("author_entry", Base.metadata,
+                                       Column("entry_id", Integer, ForeignKey("entries.id")),
+                                       Column("author_id", Integer, ForeignKey("people.id")))
 
-class Author(Base):
+editor_entry_association_table = Table("editor_entry", Base.metadata,
+                                       Column("entry_id", Integer, ForeignKey("entries.id")),
+                                       Column("editor_id", Integer, ForeignKey("people.id")))
+
+
+class Publisher(Base):
     """
-    Base class to map author entries
+    Base class to map publishers
     """
-    __tablename__ = 'authors'
+    __tablename__ = "publishers"
+
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    name = Column(String(100))
+
+    def __repr__(self):
+        return self.name
+
+
+class Type(Base):
+    """
+    Base class to map publication types
+    """
+    __tablename__ = "types"
+
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    name = Column(String(50))
+
+    def __repr__(self):
+        return self.name
+
+
+class Journal(Base):
+    """
+    Base class to map journals
+    """
+    __tablename__ = "journals"
+
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    name = Column(String(100))
+
+    def __repr__(self):
+        return self.name
+
+
+class Person(Base):
+    """
+    Base class to map authors
+    """
+    __tablename__ = "people"
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     first_name = Column(String(50))
     last_name = Column(String(50))
-    asis_name = Column(String(150))
+    asis_name = Column(String(100))
 
     def __repr__(self):
-        return """Author(
+        return """Person(
             first_name='{}',
             last_name='{}',
             asis_name='{}'""".format(
@@ -48,11 +94,14 @@ class Entry(Base):
     __tablename__ = "entries"
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
-    entry_type = Column(String(50))
+    entry_type_id = Column(Integer, ForeignKey("types.id"))
+    entry_type = relationship("Type", back_populates="entries")
     entry_id = Column(String(50))
+    authors = relationship("Person", secondary=author_entry_association_table)
     title = Column(String(200))
-    publisher = Column(String(100))
-    editor = Column(String(100))
+    publisher_id = Column(Integer, ForeignKey("publishers.id"))
+    publisher = relationship("Publisher", back_populates="entries")
+    editors = relationship("Person", secondary=editor_entry_association_table)
     year = Column(Integer)
     journal = Column(String(100))
     isbn = Column(String(50))
@@ -65,6 +114,7 @@ class Entry(Base):
         return """Entry(
             type='{}',
             id='{}',
+            authors='{}'
             title='{}',
             publisher='{}',
             editor='{}',
@@ -77,6 +127,7 @@ class Entry(Base):
             note ='{}')""".format(
             self.entry_type,
             self.entry_id,
+            self.authors,
             self.title,
             self.publisher,
             self.editor,
@@ -92,8 +143,7 @@ class Entry(Base):
 
 class BibDB:
     """
-    Database wrapper class
-    ASSIGN DATABASE SETTINGS BELOW ACCORDING TO YOUR OWN CONFIGURATION!
+    MySQL Database wrapper class - (Use constructor parameters to initialize it according to your database settings)
     """
     Engine = None
     Session = None

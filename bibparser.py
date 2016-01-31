@@ -19,15 +19,16 @@ def _customizations(record):
     """
     Bibtexparser customizations that are applied to every entry found in the .bib files
     """
-    record = homogeneize_latex_encoding(record)
-
+    record = convert_to_unicode(record)
+    record = type(record)
+    record = author(record)
     return record
 
 
 def get_all_entries(locations):
     """
     Retrieve all the .bib files and parse their content to a list of simple dictionaries
-    :param location: directory with .bib files
+    :param locations: locations of all the .bib files
     :return: return a list of dictionaries
     """
     result = []
@@ -49,7 +50,10 @@ def main():
     logger.warning("This is a main procedure only for testing this module! It shouldn't normally run!")
     bib_db = get_all_entries(glob.glob("bibs/*.bib"))
     for dct in bib_db:
-        print(dct)
+        try:
+            print(str(dct))
+        except UnicodeEncodeError as e:
+            logger.error("{}: Entry with id='{}' can't be printed".format(e.reason, dct["ID"]))
 
 
 if __name__ == "__main__":
