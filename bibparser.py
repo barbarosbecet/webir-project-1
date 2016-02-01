@@ -7,11 +7,10 @@ from init_logging import init_logging
 import logging
 import bibtexparser
 from bibtexparser.bparser import BibTexParser
-from bibtexparser.customization import *
+from bibtexparser.customization import convert_to_unicode, type, author
+from my_customization import editor
 import glob
 
-if __name__ == "__main__":
-    init_logging()
 logger = logging.getLogger(__name__)
 
 
@@ -22,6 +21,7 @@ def _customizations(record):
     record = convert_to_unicode(record)
     record = type(record)
     record = author(record)
+    record = editor(record)
     return record
 
 
@@ -57,4 +57,5 @@ def main():
 
 
 if __name__ == "__main__":
+    init_logging()
     main()

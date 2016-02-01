@@ -11,8 +11,6 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.schema import Table
 
-if __name__ == "__main__":
-    init_logging()
 logger = logging.getLogger(__name__)
 
 Base = declarative_base()
@@ -26,19 +24,6 @@ editor_entry_association_table = Table("editor_entry", Base.metadata,
                                        Column("editor_id", Integer, ForeignKey("people.id")))
 
 
-class Publisher(Base):
-    """
-    Base class to map publishers
-    """
-    __tablename__ = "publishers"
-
-    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
-    name = Column(String(100))
-
-    def __repr__(self):
-        return self.name
-
-
 class Type(Base):
     """
     Base class to map publication types
@@ -47,6 +32,21 @@ class Type(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     name = Column(String(50))
+    entries = relationship("Entry", back_populates="entry_type")
+
+    def __repr__(self):
+        return self.name
+
+
+class Publisher(Base):
+    """
+    Base class to map publishers
+    """
+    __tablename__ = "publishers"
+
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    name = Column(String(200))
+    entries = relationship("Entry", back_populates="publisher")
 
     def __repr__(self):
         return self.name
@@ -59,7 +59,8 @@ class Journal(Base):
     __tablename__ = "journals"
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
-    name = Column(String(100))
+    name = Column(String(200))
+    entries = relationship("Entry", back_populates="journal")
 
     def __repr__(self):
         return self.name
@@ -75,12 +76,14 @@ class Person(Base):
     first_name = Column(String(50))
     last_name = Column(String(50))
     asis_name = Column(String(100))
+    entries_authored = relationship("Entry", secondary=author_entry_association_table, back_populates="authors")
+    entries_editored = relationship("Entry", secondary=editor_entry_association_table, back_populates="editors")
 
     def __repr__(self):
         return """Person(
             first_name='{}',
             last_name='{}',
-            asis_name='{}'""".format(
+            asis_name='{}')""".format(
             self.first_name,
             self.last_name,
             self.asis_name
@@ -97,18 +100,21 @@ class Entry(Base):
     entry_type_id = Column(Integer, ForeignKey("types.id"))
     entry_type = relationship("Type", back_populates="entries")
     entry_id = Column(String(50))
-    authors = relationship("Person", secondary=author_entry_association_table)
-    title = Column(String(200))
+    authors = relationship("Person", secondary=author_entry_association_table, back_populates="entries_authored")
+    title = Column(String(300))
+    booktitle = Column(String(300))
     publisher_id = Column(Integer, ForeignKey("publishers.id"))
     publisher = relationship("Publisher", back_populates="entries")
-    editors = relationship("Person", secondary=editor_entry_association_table)
+    editors = relationship("Person", secondary=editor_entry_association_table, back_populates="entries_editored")
     year = Column(Integer)
-    journal = Column(String(100))
+    journal_id = Column(Integer, ForeignKey("journals.id"))
+    journal = relationship("Journal", back_populates="entries")
     isbn = Column(String(50))
     volume = Column(String(50))
     doi = Column(String(100))
-    link = Column(String(200))
-    note = Column(String(200))
+    link = Column(String(300))
+    note = Column(String(300))
+    abstract = Column(String(1000))
 
     def __repr__(self):
         return """Entry(
@@ -116,6 +122,7 @@ class Entry(Base):
             id='{}',
             authors='{}'
             title='{}',
+            booktitle='{}',
             publisher='{}',
             editor='{}',
             year='{}',
@@ -129,6 +136,7 @@ class Entry(Base):
             self.entry_id,
             self.authors,
             self.title,
+            self.booktitle,
             self.publisher,
             self.editor,
             self.year,
@@ -143,7 +151,8 @@ class Entry(Base):
 
 class BibDB:
     """
-    MySQL Database wrapper class - (Use constructor parameters to initialize it according to your database settings)
+    Database wrapper class
+    (Use constructor parameters to initialize it according to your database settings)
     """
     Engine = None
     Session = None
@@ -159,8 +168,7 @@ class BibDB:
             db_user_name,
             db_password,
             db_address,
-            db_name
-        ),
+            db_name),
             echo=verbose)
         self.Session = sessionmaker(bind=self.Engine)
 
@@ -178,29 +186,65 @@ class BibDB:
         Fill the database with parsed .bib entries
         """
         if self.Engine is not None:
-            try:
-                items = []
-                for ent in bib_list:
-                    new_entry = Entry(
-                        entry_type=ent.get("ENTRYTYPE", "").encode("utf-8"),
-                        entry_id=ent.get("ID", "").encode("utf-8"),
-                        title=ent.get("title", "").encode("utf-8"),
-                        publisher=ent.get("publisher", "").encode("utf-8"),
-                        editor=ent.get("editor", "").encode("utf-8"),
-                        year=int(ent.get("year", "").encode("utf-8")),
-                        journal=ent.get("journal", "").encode("utf-8"),
-                        isbn=ent.get("isbn", "").encode("utf-8"),
-                        volume=ent.get("volume", "").encode("utf-8"),
-                        doi=ent.get("doi", "").encode("utf-8"),
-                        link=ent.get("link", "").encode("utf-8"),
-                        note=ent.get("note", "").encode("utf-8")
-                    )
-                    items.append(new_entry)
-                session = self.Session()
-                session.add_all(items)
-                session.commit()
-            except:
-                logger.error("Error at writing to database!")
+            items = []
+            for ent in bib_list:
+                new_entry = Entry()
+                if "ID" in ent:
+                    new_entry.entry_id = ent.get("ID").encode("utf-8")
+                if "title" in ent:
+                    new_entry.title = ent.get("title").encode("utf-8")
+                if "year" in ent:
+                    try:
+                        new_entry.year = int(ent.get("year"))
+                    except ValueError:
+                        new_entry.year = None
+                if "isbn" in ent:
+                    new_entry.isbn = ent.get("isbn").encode("utf-8")
+                if "volume" in ent:
+                    new_entry.volume = ent.get("volume").encode("utf-8")
+                if "doi" in ent:
+                    new_entry.doi = ent.get("doi").encode("utf-8")
+                if "link" in ent:
+                    new_entry.link = ent.get("link").encode("utf-8")
+                if "note" in ent:
+                    new_entry.note = ent.get("note").encode("utf-8")
+                if "abstract" in ent:
+                    new_entry.abstract = ent.get("abstract").encode("utf-8")
+                if "ENTRYTYPE" in ent:
+                    # TODO: Disambiguation
+                    new_entry.entry_type = Type(name=ent.get("ENTRYTYPE").encode("utf-8"))
+                if "publisher" in ent:
+                    # TODO: Disambiguation
+                    new_entry.publisher = Publisher(name=ent.get("publisher").encode("utf-8"))
+                if "author" in ent:
+                    # TODO: Disambiguation
+                    for name_str in ent["author"]:
+                        if "," in name_str:
+                            ln, _, fn = name_str.partition(",")
+                        else:
+                            fn, _, ln = name_str.rpartition(" ")
+                        new_author = Person(first_name=fn.strip().encode("utf-8"),
+                                            last_name=ln.strip().encode("utf-8"),
+                                            asis_name=name_str.encode("utf-8"))
+                        new_entry.authors.append(new_author)
+                if "editor" in ent:
+                    # TODO: Disambiguation
+                    for name_str in ent["editor"]:
+                        if "," in name_str:
+                            ln, _, fn = name_str.partition(",")
+                        else:
+                            fn, _, ln = name_str.rpartition(" ")
+                        new_editor = Person(first_name=fn.strip().encode("utf-8"),
+                                            last_name=ln.strip().encode("utf-8"),
+                                            asis_name=name_str.encode("utf-8"))
+                        new_entry.editors.append(new_editor)
+                if "journal" in ent:
+                    # TODO: Disambiguation
+                    new_entry.journal = Journal(name=ent.get("journal").encode("utf-8"))
+                items.append(new_entry)
+            session = self.Session()
+            session.add_all(items)
+            session.commit()
         else:
             logger.error("Engine is NOT initialized!")
 
@@ -215,4 +259,5 @@ def main():
 
 
 if __name__ == "__main__":
+    init_logging()
     main()
