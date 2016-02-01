@@ -1,5 +1,5 @@
 """
-WiSe 15, WebIR, Project-1, Becet, Simmet
+WiSe 15, WebIR, Project-2, Becet, Simmet
 Crawler Module
 """
 
@@ -20,6 +20,7 @@ from validateurl import url_is_relative
 biblist = []
 file_locations = []
 download_counter = 0
+links_watched = 0
 
 if __name__ == "__main__":
     init_logging()
@@ -30,7 +31,7 @@ DEPTH_LEVEL_CHARACTER = '*'
 
 def exit_error(error, error_code):
     """
-    exit_error function prints an error and exit with code specified
+    exit_error function prints an error and exit with the specified error code
 
     Keyword arguments:
     error -- The error to print on the screen
@@ -45,7 +46,11 @@ def exit_error(error, error_code):
 
 def bib_download(urls,instant = False):
     """
-    Downloading of the specified Bib URLs
+    Downloading of the specified Bib URLs either for instant use or not
+
+    Keyword arguments:
+    urls -- An array of urls or a single url to download
+    instant -- if true it will download only one file for instant use
     """
     global download_counter
     if instant == False:
@@ -98,42 +103,40 @@ def bib_download(urls,instant = False):
         return location[0]
 
 
-def print_links_to_level(url, max_depth=2, dInstant=False):
+def bib_crawl(url, max_level=2, dInstant=False):
     """
-    arsespyder main function. Receives a URL and the crawling depth
-    and prints on screen the links of the url, the links of the links
-    of the url, etc. up to the max_depth
+    Receives a URL and a specified crawling depth and a download flag. It will crawl for bib files until the specified
+    deepness. If dInstant is true this files will be download right away.
 
     Keyword arguments:
     url -- A string with the URL to analyze
-    max_depth -- The maximum depth of link analysis
+    max_level -- The maximum depth of crawling for bib files
+    dInstant -- if true it will download the files right away
 
     """
     if not url_is_http(url):
         exit_error("ERROR: URL provided must have HTTP/HTTPS scheme", 1)
     else:
-        # First print all the child links (links on the URL)
-        print_child_list(url, 1, dInstant)
+        # First print all the child links of the URL
+        get_child_list(url, 1, dInstant)
 
-        # Print level 2 links and recursive among their links until reach
-        # maximum depth
-        recursive_analyze_links(url, 2, max_depth, dInstant)
+        # Print level 2 links and recursive among their links until reach maximum level
+        recursive_bib_crawl(url, 2, max_level, dInstant)
 
 
-def recursive_analyze_links(url, depth, max_depth, dInstant):
-    url_list2 = []
+def recursive_bib_crawl(url, depth, max_level, dInstant):
     """
-    Recursive function that prints the links of the url and at level depth,
-    and if the max_depth has not been reached, continues analyzing to the
-    next level
+    Recursive function that crawl at level of depth,
+    and if the max_level has not been reached, continues analyzing to the
+    next level.
 
     Keyword arguments:
     url -- A string with the URL to analyze
-    depth -- The crawling depth being analyzed
-    max_depth -- The maximum depth of link analysis
-
+    depth -- The current crawling depth
+    max_level -- The maximum depth of crawling
     """
 
+    url_list2 = []
     url_list = get_url_list(url)
 
     for l in url_list:
@@ -143,28 +146,28 @@ def recursive_analyze_links(url, depth, max_depth, dInstant):
         elif True:
             url_list2.append(urljoin(url, l))
 
-    if depth <= max_depth:
+    if depth <= max_level:
         for l in url_list2:
-            print_child_list(l, depth, dInstant)
+            get_child_list(l, depth, dInstant)
 
         for l in url_list2:
-            recursive_analyze_links(l, depth+1, max_depth, dInstant)
+            recursive_bib_crawl(l, depth+1, max_level, dInstant)
 
 
-def print_child_list(url, depth, dInstant):
+def get_child_list(url, depth, dInstant):
     """
-    Function to print all the links contained in a url, together with a
+    Function to get all the links contained in a url, together with a
     series of characters indicating the depth level of the link
     being printed
 
     Keyword arguments:
-    url -- A string with the URL to analyze
+    url -- The URL to analyze
     depth -- The crawling depth being analyzed, needed for printing stuff
-
     """
     bibtmp = []
     url_list = get_url_list(url)
     global file_locations
+    global links_watched
 
     if dInstant == False:
         for l in url_list:
@@ -176,6 +179,7 @@ def print_child_list(url, depth, dInstant):
                 if l.endswith(".bib") or l.endswith(".bib.gz"):
                     biblist.append(urljoin(url, l))
                     bibtmp.append(urljoin(url, l))
+            links_watched = links_watched +1
     else:
         for l in url_list:
             if url_is_http(l):
@@ -186,6 +190,8 @@ def print_child_list(url, depth, dInstant):
                 if l.endswith(".bib") or l.endswith(".bib.gz"):
                     file_locations.append(bib_download(urljoin(url, l), True))
                     bibtmp.append(urljoin(url, l))
+            links_watched = links_watched +1
+        logger.info("Links watched in total: %i" % links_watched)
 
     """
     for l in url_list2:
@@ -204,7 +210,6 @@ def print_depth_point(depth):
 
     Keyword arguments:
     depth -- The amount of 'depth level characters' to print
-
     """
 
     counter = 0
@@ -216,33 +221,32 @@ def print_depth_point(depth):
 
 def get_file_locations(max_level = 2, dInstant = False):
     """
-    Starts the process with the specified level deepness and returns a list of the locations of the bib files.
+    Starts the process with the specified level deepness and returns a list of the locations of the bib files.By the
+    parameter dInstant is defined if the founded bib files should be download right away or after the crawling is done.
+
+    Keyword arguments:
+    max_level -- The maximum depth of crawling for bib files
+    dInstant -- if true it will download the files right away
     """
     global file_locations
 
     with open("seeds.txt") as f:
         urls = f.readlines()
-
-    print_links_to_level(urls[0], max_level, dInstant)
+    for l in range(len(urls)):
+        bib_crawl(urls[l], max_level, dInstant)
     if dInstant == False:
         file_locations = bib_download(biblist)
+        logger.info("Links watched in total: %i" % links_watched)
 
     return file_locations
 
 
 def main():
-    """
-    with open("seeds.txt") as f:
-        urls = f.readlines()
-
-    print_links_to_level(urls[0], 2);
-
-    file_locations = bib_download(biblist);
-    print(file_locations)
-    """
+    global links_watched
 
     file_locations = get_file_locations(2, False)
     print(file_locations)
+
 
 if __name__ == "__main__":
     main()
