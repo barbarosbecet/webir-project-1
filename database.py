@@ -1,5 +1,5 @@
 """
-WiSe 15, WebIR, Project-1, Becet, Simmet
+WiSe 15, WebIR, Project-2, Becet, Simmet
 Database Module
 """
 
@@ -114,7 +114,7 @@ class Entry(Base):
     doi = Column(String(100))
     link = Column(String(300))
     note = Column(String(300))
-    abstract = Column(String(1000))
+    abstract = Column(String(500))
 
     def __repr__(self):
         return """Entry(
@@ -186,13 +186,16 @@ class BibDB:
         Fill the database with parsed .bib entries
         """
         if self.Engine is not None:
-            items = []
+            session = self.Session()
             for ent in bib_list:
                 new_entry = Entry()
                 if "ID" in ent:
                     new_entry.entry_id = ent.get("ID").encode("utf-8")
                 if "title" in ent:
                     new_entry.title = ent.get("title").encode("utf-8")
+                    entry_match = session.query(Entry).filter(Entry.title == new_entry.title).first()
+                    if entry_match is not None:
+                        continue
                 if "year" in ent:
                     try:
                         new_entry.year = int(ent.get("year"))
@@ -211,39 +214,107 @@ class BibDB:
                 if "abstract" in ent:
                     new_entry.abstract = ent.get("abstract").encode("utf-8")
                 if "ENTRYTYPE" in ent:
-                    # TODO: Disambiguation
-                    new_entry.entry_type = Type(name=ent.get("ENTRYTYPE").encode("utf-8"))
+                    match = session.query(Type).filter(Type.name == ent.get("ENTRYTYPE")).first()
+                    if match is None:
+                        new_entry.entry_type = Type(name=ent.get("ENTRYTYPE").encode("utf-8"))
+                    else:
+                        new_entry.entry_type = match
                 if "publisher" in ent:
-                    # TODO: Disambiguation
-                    new_entry.publisher = Publisher(name=ent.get("publisher").encode("utf-8"))
+                    match = session.query(Publisher).filter(Publisher.name == ent.get("publisher")).first()
+                    if match is None:
+                        new_entry.publisher = Publisher(name=ent.get("publisher").encode("utf-8"))
+                    else:
+                        new_entry.publisher = match
+                if "journal" in ent:
+                    match = session.query(Journal).filter(Journal.name == ent.get("journal")).first()
+                    if match is None:
+                        new_entry.journal = Journal(name=ent.get("journal").encode("utf-8"))
+                    else:
+                        new_entry.journal = match
                 if "author" in ent:
-                    # TODO: Disambiguation
                     for name_str in ent["author"]:
                         if "," in name_str:
                             ln, _, fn = name_str.partition(",")
                         else:
                             fn, _, ln = name_str.rpartition(" ")
-                        new_author = Person(first_name=fn.strip().encode("utf-8"),
-                                            last_name=ln.strip().encode("utf-8"),
-                                            asis_name=name_str.encode("utf-8"))
+                        fn = fn.strip().encode("utf-8")
+                        ln = ln.strip().encode("utf-8")
+                        name_str = name_str.encode("utf-8")
+
+                        match_1 = session.query(Person).filter(Person.asis_name == name_str).first()
+                        if match_1 is not None:
+                            new_author = match_1
+                            new_entry.authors.append(new_author)
+                            continue
+                        match_2 = session.query(Person).filter(Person.first_name == fn)\
+                            .filter(Person.last_name == ln).first()
+                        if match_2 is not None:
+                            new_author = match_2
+                            new_entry.authors.append(new_author)
+                            continue
+                        match_3 = session.query(Person).filter(Person.last_name == ln)
+                        if match_3.count() > 0:
+                            if fn[1] == ".":
+                                match_3_1 = match_3.filter(Person.first_name.like(fn[0]+"%")).first()
+                                if match_3_1 is not None:
+                                    new_author = match_3_1
+                                    new_entry.authors.append(new_author)
+                                    continue
+                            else:
+                                match_3_2 = match_3.filter(Person.first_name.like("_.%"))
+                                if match_3_2.count() > 0:
+                                    match_3_2_1 = match_3_2.filter(Person.first_name == fn[0]+".").first()
+                                    if match_3_2_1 is not None:
+                                        new_author = match_3_2_1
+                                        new_entry.authors.append(new_author)
+                                        continue
+                        new_author = Person(first_name=fn.strip(),
+                                            last_name=ln.strip(),
+                                            asis_name=name_str)
                         new_entry.authors.append(new_author)
                 if "editor" in ent:
-                    # TODO: Disambiguation
                     for name_str in ent["editor"]:
                         if "," in name_str:
                             ln, _, fn = name_str.partition(",")
                         else:
                             fn, _, ln = name_str.rpartition(" ")
-                        new_editor = Person(first_name=fn.strip().encode("utf-8"),
-                                            last_name=ln.strip().encode("utf-8"),
-                                            asis_name=name_str.encode("utf-8"))
+                        fn = fn.strip().encode("utf-8")
+                        ln = ln.strip().encode("utf-8")
+                        name_str = name_str.encode("utf-8")
+
+                        match_1 = session.query(Person).filter(Person.asis_name == name_str).first()
+                        if match_1 is not None:
+                            new_editor = match_1
+                            new_entry.editors.append(new_editor)
+                            continue
+                        match_2 = session.query(Person).filter(Person.first_name == fn)\
+                            .filter(Person.last_name == ln).first()
+                        if match_2 is not None:
+                            new_editor = match_2
+                            new_entry.editors.append(new_editor)
+                            continue
+                        match_3 = session.query(Person).filter(Person.last_name == ln)
+                        if match_3.count() > 0:
+                            if fn[1] == ".":
+                                match_3_1 = match_3.filter(Person.first_name.like(fn[0]+"%")).first()
+                                if match_3_1 is not None:
+                                    new_editor = match_3_1
+                                    new_entry.editors.append(new_editor)
+                                    continue
+                            else:
+                                match_3_2 = match_3.filter(Person.first_name.like("_.%"))
+                                if match_3_2.count() > 0:
+                                    match_3_2_1 = match_3_2.filter(Person.first_name == fn[0]+".").first()
+                                    if match_3_2_1 is not None:
+                                        match_3_2_1.first_name = fn
+                                        new_editor = match_3_2_1
+                                        new_entry.editors.append(new_editor)
+                                        continue
+                        new_editor = Person(first_name=fn.strip(),
+                                            last_name=ln.strip(),
+                                            asis_name=name_str)
                         new_entry.editors.append(new_editor)
-                if "journal" in ent:
-                    # TODO: Disambiguation
-                    new_entry.journal = Journal(name=ent.get("journal").encode("utf-8"))
-                items.append(new_entry)
-            session = self.Session()
-            session.add_all(items)
+                session.add(new_entry)
             session.commit()
         else:
             logger.error("Engine is NOT initialized!")

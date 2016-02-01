@@ -1,5 +1,5 @@
 """
-WiSe 15, WebIR, Project-1, Becet, Simmet
+WiSe 15, WebIR, Project-2, Becet, Simmet
 Starter Module
 """
 
