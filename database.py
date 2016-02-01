@@ -241,33 +241,34 @@ class BibDB:
                         ln = ln.strip().encode("utf-8")
                         name_str = name_str.encode("utf-8")
 
-                        match_1 = session.query(Person).filter(Person.asis_name == name_str).first()
-                        if match_1 is not None:
-                            new_author = match_1
-                            new_entry.authors.append(new_author)
-                            continue
-                        match_2 = session.query(Person).filter(Person.first_name == fn)\
-                            .filter(Person.last_name == ln).first()
-                        if match_2 is not None:
-                            new_author = match_2
-                            new_entry.authors.append(new_author)
-                            continue
-                        match_3 = session.query(Person).filter(Person.last_name == ln)
-                        if match_3.count() > 0:
-                            if fn[1] == ".":
-                                match_3_1 = match_3.filter(Person.first_name.like(fn[0]+"%")).first()
-                                if match_3_1 is not None:
-                                    new_author = match_3_1
-                                    new_entry.authors.append(new_author)
-                                    continue
-                            else:
-                                match_3_2 = match_3.filter(Person.first_name.like("_.%"))
-                                if match_3_2.count() > 0:
-                                    match_3_2_1 = match_3_2.filter(Person.first_name == fn[0]+".").first()
-                                    if match_3_2_1 is not None:
-                                        new_author = match_3_2_1
+                        if len(fn) > 1 and len(ln) > 1:
+                            match_1 = session.query(Person).filter(Person.asis_name == name_str).first()
+                            if match_1 is not None:
+                                new_author = match_1
+                                new_entry.authors.append(new_author)
+                                continue
+                            match_2 = session.query(Person).filter(Person.first_name == fn)\
+                                .filter(Person.last_name == ln).first()
+                            if match_2 is not None:
+                                new_author = match_2
+                                new_entry.authors.append(new_author)
+                                continue
+                            match_3 = session.query(Person).filter(Person.last_name == ln)
+                            if match_3.count() > 0:
+                                if "." in str(fn):
+                                    match_3_1 = match_3.filter(Person.first_name.like(str(fn[0])+"%")).first()
+                                    if match_3_1 is not None:
+                                        new_author = match_3_1
                                         new_entry.authors.append(new_author)
                                         continue
+                                else:
+                                    match_3_2 = match_3.filter(Person.first_name.like("_.%"))
+                                    if match_3_2.count() > 0:
+                                        match_3_2_1 = match_3_2.filter(Person.first_name == str(fn[0])+".").first()
+                                        if match_3_2_1 is not None:
+                                            new_author = match_3_2_1
+                                            new_entry.authors.append(new_author)
+                                            continue
                         new_author = Person(first_name=fn.strip(),
                                             last_name=ln.strip(),
                                             asis_name=name_str)
@@ -281,35 +282,35 @@ class BibDB:
                         fn = fn.strip().encode("utf-8")
                         ln = ln.strip().encode("utf-8")
                         name_str = name_str.encode("utf-8")
-
-                        match_1 = session.query(Person).filter(Person.asis_name == name_str).first()
-                        if match_1 is not None:
-                            new_editor = match_1
-                            new_entry.editors.append(new_editor)
-                            continue
-                        match_2 = session.query(Person).filter(Person.first_name == fn)\
-                            .filter(Person.last_name == ln).first()
-                        if match_2 is not None:
-                            new_editor = match_2
-                            new_entry.editors.append(new_editor)
-                            continue
-                        match_3 = session.query(Person).filter(Person.last_name == ln)
-                        if match_3.count() > 0:
-                            if fn[1] == ".":
-                                match_3_1 = match_3.filter(Person.first_name.like(fn[0]+"%")).first()
-                                if match_3_1 is not None:
-                                    new_editor = match_3_1
-                                    new_entry.editors.append(new_editor)
-                                    continue
-                            else:
-                                match_3_2 = match_3.filter(Person.first_name.like("_.%"))
-                                if match_3_2.count() > 0:
-                                    match_3_2_1 = match_3_2.filter(Person.first_name == fn[0]+".").first()
-                                    if match_3_2_1 is not None:
-                                        match_3_2_1.first_name = fn
-                                        new_editor = match_3_2_1
+                        if len(fn) > 1 and len(ln) > 1:
+                            match_1 = session.query(Person).filter(Person.asis_name == name_str).first()
+                            if match_1 is not None:
+                                new_editor = match_1
+                                new_entry.editors.append(new_editor)
+                                continue
+                            match_2 = session.query(Person).filter(Person.first_name == fn)\
+                                .filter(Person.last_name == ln).first()
+                            if match_2 is not None:
+                                new_editor = match_2
+                                new_entry.editors.append(new_editor)
+                                continue
+                            match_3 = session.query(Person).filter(Person.last_name == ln)
+                            if match_3.count() > 0:
+                                if "." in str(fn):
+                                    match_3_1 = match_3.filter(Person.first_name.like(str(fn[0])+"%")).first()
+                                    if match_3_1 is not None:
+                                        new_editor = match_3_1
                                         new_entry.editors.append(new_editor)
                                         continue
+                                else:
+                                    match_3_2 = match_3.filter(Person.first_name.like("_.%"))
+                                    if match_3_2.count() > 0:
+                                        match_3_2_1 = match_3_2.filter(Person.first_name == str(fn[0])+".").first()
+                                        if match_3_2_1 is not None:
+                                            match_3_2_1.first_name = fn
+                                            new_editor = match_3_2_1
+                                            new_entry.editors.append(new_editor)
+                                            continue
                         new_editor = Person(first_name=fn.strip(),
                                             last_name=ln.strip(),
                                             asis_name=name_str)

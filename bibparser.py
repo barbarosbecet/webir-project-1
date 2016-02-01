@@ -35,11 +35,12 @@ def get_all_entries(locations):
     my_parser = BibTexParser()
     my_parser.customization = _customizations
     for file_location in locations:
-        try:
-            with open(file_location, encoding="utf-8") as bib_file:
-                result.extend(bibtexparser.load(bib_file, parser=my_parser).entries)
-        except:
-            logger.error(" - ".join(".bib parsing error: ", file_location))
+        if file_location.endswith(".bib"):
+            with open(file_location) as bib_file:
+                try:
+                    result.extend(bibtexparser.load(bib_file, parser=my_parser).entries)
+                except:
+                    logger.error(".bib parsing error: " + file_location)
     return result
 
 
