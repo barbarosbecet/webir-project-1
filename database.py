@@ -220,13 +220,13 @@ class BibDB:
                     else:
                         new_entry.entry_type = match
                 if "publisher" in ent:
-                    match = session.query(Publisher).filter(Publisher.name == ent.get("publisher")).first()
+                    match = session.query(Publisher).filter(Publisher.name == ent.get("publisher").encode("utf-8")).first()
                     if match is None:
                         new_entry.publisher = Publisher(name=ent.get("publisher").encode("utf-8"))
                     else:
                         new_entry.publisher = match
                 if "journal" in ent:
-                    match = session.query(Journal).filter(Journal.name == ent.get("journal")).first()
+                    match = session.query(Journal).filter(Journal.name == ent.get("journal").encode("utf-8")).first()
                     if match is None:
                         new_entry.journal = Journal(name=ent.get("journal").encode("utf-8"))
                     else:
