@@ -28,7 +28,6 @@ def bib_download(urls):
             response = urlopen(urls[item])
         except URLError as e:
             logger.error("URL/HTTP error @ {} : {}".format(urls[item], e))
-            return None
         else:
             if response.status == 200 and urls[item].endswith(".bib"):
                 logger.info("Downloading file @ {}".format(urls[item]))
@@ -99,7 +98,7 @@ def get_file_locations(max_level):
     """
     Starts the process with the specified level deepness and returns a list of the locations of the bib files.
     """
-    with open("seeds.txt") as f:
+    with open("seeds2.txt") as f:
         urls = f.readlines()
 
     all_bib_links = crawl(urls, max_level)
@@ -109,11 +108,11 @@ def get_file_locations(max_level):
 
 
 def main():
-    with open("seeds.txt") as f:
+    with open("seeds2.txt") as f:
         urls = f.readlines()
 
     # naked_url needed for some pages, have to be known
-    all_bib_links = crawl(urls, 2)
+    all_bib_links = crawl(urls, 1)
     file_locations = bib_download(all_bib_links)
     print(file_locations)
 
