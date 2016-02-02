@@ -214,13 +214,14 @@ class BibDB:
                 if "abstract" in ent:
                     new_entry.abstract = ent.get("abstract").encode("utf-8")
                 if "ENTRYTYPE" in ent:
-                    match = session.query(Type).filter(Type.name == ent.get("ENTRYTYPE")).first()
+                    match = session.query(Type).filter(Type.name == ent.get("ENTRYTYPE").encode("utf-8")).first()
                     if match is None:
                         new_entry.entry_type = Type(name=ent.get("ENTRYTYPE").encode("utf-8"))
                     else:
                         new_entry.entry_type = match
                 if "publisher" in ent:
-                    match = session.query(Publisher).filter(Publisher.name == ent.get("publisher").encode("utf-8")).first()
+                    match = session.query(Publisher).\
+                        filter(Publisher.name == ent.get("publisher").encode("utf-8")).first()
                     if match is None:
                         new_entry.publisher = Publisher(name=ent.get("publisher").encode("utf-8"))
                     else:
@@ -237,26 +238,27 @@ class BibDB:
                             ln, _, fn = name_str.partition(",")
                         else:
                             fn, _, ln = name_str.rpartition(" ")
-                        fn = fn.strip().encode("utf-8")
-                        ln = ln.strip().encode("utf-8")
-                        name_str = name_str.encode("utf-8")
+                        fn = fn.strip()
+                        ln = ln.strip()
+                        name_str = name_str
 
                         if len(fn) > 1 and len(ln) > 1:
-                            match_1 = session.query(Person).filter(Person.asis_name == name_str).first()
+                            match_1 = session.query(Person).filter(Person.asis_name == name_str.encode("utf-8")).first()
                             if match_1 is not None:
                                 new_author = match_1
                                 new_entry.authors.append(new_author)
                                 continue
-                            match_2 = session.query(Person).filter(Person.first_name == fn)\
-                                .filter(Person.last_name == ln).first()
+                            match_2 = session.query(Person).filter(Person.first_name == fn.encode("utf-8"))\
+                                .filter(Person.last_name == ln.encode("utf-8")).first()
                             if match_2 is not None:
                                 new_author = match_2
                                 new_entry.authors.append(new_author)
                                 continue
-                            match_3 = session.query(Person).filter(Person.last_name == ln)
+                            match_3 = session.query(Person).filter(Person.last_name == ln.encode("utf-8"))
                             if match_3.count() > 0:
-                                if "." in str(fn):
-                                    match_3_1 = match_3.filter(Person.first_name.like(str(fn[0])+"%")).first()
+                                if fn[1] == ".":
+                                    match_3_1 = match_3.\
+                                        filter(Person.first_name.like((fn[0]+"%").encode("utf-8"))).first()
                                     if match_3_1 is not None:
                                         new_author = match_3_1
                                         new_entry.authors.append(new_author)
@@ -264,14 +266,15 @@ class BibDB:
                                 else:
                                     match_3_2 = match_3.filter(Person.first_name.like("_.%"))
                                     if match_3_2.count() > 0:
-                                        match_3_2_1 = match_3_2.filter(Person.first_name == str(fn[0])+".").first()
+                                        match_3_2_1 = match_3_2.\
+                                            filter(Person.first_name == ((fn[0]+".").encode("utf-8"))).first()
                                         if match_3_2_1 is not None:
                                             new_author = match_3_2_1
                                             new_entry.authors.append(new_author)
                                             continue
-                        new_author = Person(first_name=fn.strip(),
-                                            last_name=ln.strip(),
-                                            asis_name=name_str)
+                        new_author = Person(first_name=fn.encode("utf-8"),
+                                            last_name=ln.encode("utf-8"),
+                                            asis_name=name_str.encode("utf-8"))
                         new_entry.authors.append(new_author)
                 if "editor" in ent:
                     for name_str in ent["editor"]:
@@ -279,41 +282,43 @@ class BibDB:
                             ln, _, fn = name_str.partition(",")
                         else:
                             fn, _, ln = name_str.rpartition(" ")
-                        fn = fn.strip().encode("utf-8")
-                        ln = ln.strip().encode("utf-8")
-                        name_str = name_str.encode("utf-8")
+                        fn = fn.strip()
+                        ln = ln.strip()
+                        name_str = name_str
+
                         if len(fn) > 1 and len(ln) > 1:
-                            match_1 = session.query(Person).filter(Person.asis_name == name_str).first()
+                            match_1 = session.query(Person).filter(Person.asis_name == name_str.encode("utf-8")).first()
                             if match_1 is not None:
                                 new_editor = match_1
                                 new_entry.editors.append(new_editor)
                                 continue
-                            match_2 = session.query(Person).filter(Person.first_name == fn)\
-                                .filter(Person.last_name == ln).first()
+                            match_2 = session.query(Person).filter(Person.first_name == fn.encode("utf-8"))\
+                                .filter(Person.last_name == ln.encode("utf-8")).first()
                             if match_2 is not None:
                                 new_editor = match_2
                                 new_entry.editors.append(new_editor)
                                 continue
-                            match_3 = session.query(Person).filter(Person.last_name == ln)
+                            match_3 = session.query(Person).filter(Person.last_name == ln.encode("utf-8"))
                             if match_3.count() > 0:
-                                if "." in str(fn):
-                                    match_3_1 = match_3.filter(Person.first_name.like(str(fn[0])+"%")).first()
+                                if fn[1] == ".":
+                                    match_3_1 = match_3.\
+                                        filter(Person.first_name.like((fn[0]+"%").encode("utf-8"))).first()
                                     if match_3_1 is not None:
-                                        new_editor = match_3_1
-                                        new_entry.editors.append(new_editor)
+                                        new_author = match_3_1
+                                        new_entry.authors.append(new_author)
                                         continue
                                 else:
                                     match_3_2 = match_3.filter(Person.first_name.like("_.%"))
                                     if match_3_2.count() > 0:
-                                        match_3_2_1 = match_3_2.filter(Person.first_name == str(fn[0])+".").first()
+                                        match_3_2_1 = match_3_2.\
+                                            filter(Person.first_name == ((fn[0]+".").encode("utf-8"))).first()
                                         if match_3_2_1 is not None:
-                                            match_3_2_1.first_name = fn
-                                            new_editor = match_3_2_1
-                                            new_entry.editors.append(new_editor)
+                                            new_author = match_3_2_1
+                                            new_entry.authors.append(new_author)
                                             continue
-                        new_editor = Person(first_name=fn.strip(),
-                                            last_name=ln.strip(),
-                                            asis_name=name_str)
+                        new_editor = Person(first_name=fn.encode("utf-8"),
+                                            last_name=ln.encode("utf-8"),
+                                            asis_name=name_str.encode("utf-8"))
                         new_entry.editors.append(new_editor)
                 session.add(new_entry)
             session.commit()
